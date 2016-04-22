@@ -33,6 +33,7 @@ PImage logo;
 byte[] buffer = new byte[BUFFER_SIZE];
 
 void setup() {
+  // init screen and resources
   size(600,450);
   background(0);
   smooth(2);
@@ -41,8 +42,9 @@ void setup() {
   logo = loadImage("ashab-ns1.jpg");
   draw_interface();
   
-  // create and open socket
+  // create and open socket with direwolf
   agw_sock = new Client(this, TCP_IP, TCP_PORT);
+  // send AGW "m" packet so direwolf starts sending packets to us
   agw_sock.write(M_MESSAGE);
   
   
@@ -50,7 +52,7 @@ void setup() {
 }
 
 void draw() {
-  // get data
+  // get packet data
   if (agw_sock.available() > 0) {
    int byte_num = agw_sock.readBytes(buffer);
    if (byte_num > 0) {
@@ -58,28 +60,32 @@ void draw() {
      println(data);
      // find fields
      String[] fields = split(data, "/");
-     // clear fields
-     fields[FIELD_LAT] = split(fields[FIELD_LAT], "!")[1];
-     String hdg = split(fields[FIELD_LON], "O")[1];
-     fields[FIELD_LON] = split(fields[FIELD_LON], "O")[0];
      
-     // draw data
-     background(0);
-     draw_interface();
-     textSize(15);
-     text("Data Valid: " + fields[FIELD_DAT] + " " + fields[FIELD_TIM], 30, 415);
-     text("LAT: " + fields[FIELD_LAT], 30, 70);
-     text("LON: " + fields[FIELD_LON], 30, 90);
-     text("ALT: " + split(fields[FIELD_ALT],"=")[1], 30, 110);
+     // if we have more than 11 fields, looks like a good packet
+     if (fields.length > 11) {
      
-     text("BATT: " + split(fields[FIELD_VLT],"=")[1], 30, 250);
-     text("TIN:  " + split(fields[FIELD_TIN],"=")[1], 30, 270);
-     text("TOUT: " + split(fields[FIELD_TOU],"=")[1], 30, 290);
-     text("BAR:  " + split(fields[FIELD_BAR],"=")[1], 30, 310);
-     
-     text("HDG:  " + hdg, 300, 70);
-     text("SPD:  " + fields[FIELD_SPD], 300, 90);
-     
+       // clear fields that contain more than one data value
+       fields[FIELD_LAT] = split(fields[FIELD_LAT], "!")[1];
+       String hdg = split(fields[FIELD_LON], "O")[1];
+       fields[FIELD_LON] = split(fields[FIELD_LON], "O")[0];
+       
+       // draw data
+       background(0);
+       draw_interface();
+       textSize(15);
+       text("Data Valid: " + fields[FIELD_DAT] + " " + fields[FIELD_TIM], 30, 415);
+       text("LAT: " + fields[FIELD_LAT], 30, 70);
+       text("LON: " + fields[FIELD_LON], 30, 90);
+       text("ALT: " + split(fields[FIELD_ALT],"=")[1], 30, 110);
+       
+       text("BATT: " + split(fields[FIELD_VLT],"=")[1], 30, 250);
+       text("TIN:  " + split(fields[FIELD_TIN],"=")[1], 30, 270);
+       text("TOUT: " + split(fields[FIELD_TOU],"=")[1], 30, 290);
+       text("BAR:  " + split(fields[FIELD_BAR],"=")[1], 30, 310);
+       
+       text("HDG:  " + hdg, 300, 70);
+       text("SPD:  " + fields[FIELD_SPD], 300, 90);
+     }
    }
   }
 }
