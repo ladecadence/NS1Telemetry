@@ -1,4 +1,5 @@
 import processing.net.*;
+import java.io.FileWriter;
 
 final String TCP_IP = "127.0.0.1";
 final int    TCP_PORT = 8000;
@@ -27,10 +28,13 @@ final int FIELD_TIM = 9;
 final int FIELD_GPS = 10;
 final int FIELD_MSG = 11;
 
+final String datafile = "ns1log.csv";
+
 Client agw_sock;
 PFont main_font;
 PImage logo;
 byte[] buffer = new byte[BUFFER_SIZE];
+FileWriter log;
 
 void setup() {
   // init screen and resources
@@ -63,28 +67,47 @@ void draw() {
      
      // if we have more than 11 fields, looks like a good packet
      if (fields.length > 11) {
-     
-       // clear fields that contain more than one data value
-       fields[FIELD_LAT] = split(fields[FIELD_LAT], "!")[1];
-       String hdg = split(fields[FIELD_LON], "O")[1];
-       fields[FIELD_LON] = split(fields[FIELD_LON], "O")[0];
-       
-       // draw data
-       background(0);
-       draw_interface();
-       textSize(15);
-       text("Data Valid: " + fields[FIELD_DAT] + " " + fields[FIELD_TIM], 30, 415);
-       text("LAT: " + fields[FIELD_LAT], 30, 70);
-       text("LON: " + fields[FIELD_LON], 30, 90);
-       text("ALT: " + split(fields[FIELD_ALT],"=")[1], 30, 110);
-       
-       text("BATT: " + split(fields[FIELD_VLT],"=")[1], 30, 250);
-       text("TIN:  " + split(fields[FIELD_TIN],"=")[1], 30, 270);
-       text("TOUT: " + split(fields[FIELD_TOU],"=")[1], 30, 290);
-       text("BAR:  " + split(fields[FIELD_BAR],"=")[1], 30, 310);
-       
-       text("HDG:  " + hdg, 300, 70);
-       text("SPD:  " + fields[FIELD_SPD], 300, 90);
+       try {
+         // clear fields that contain more than one data value
+         fields[FIELD_LAT] = split(fields[FIELD_LAT], "!")[1];
+         String hdg = split(fields[FIELD_LON], "O")[1];
+         fields[FIELD_LON] = split(fields[FIELD_LON], "O")[0];
+         String lat = split(split(fields[FIELD_GPS], "=")[1], ",")[0];
+         String lon = split(split(fields[FIELD_GPS], "=")[1], ",")[1];
+         String alt = split(fields[FIELD_ALT],"=")[1];
+         String batt = split(fields[FIELD_VLT],"=")[1];
+         String tin = split(fields[FIELD_TIN],"=")[1];
+         String tout = split(fields[FIELD_TOU],"=")[1];
+         String baro = split(fields[FIELD_BAR],"=")[1];
+         
+         
+         // draw data
+         background(0);
+         draw_interface();
+         textSize(15);
+         text("Data Valid: " + fields[FIELD_DAT] + " " + fields[FIELD_TIM], 30, 415);
+         text("LAT: " + lat, 30, 70);
+         text("LON: " + lon, 30, 90);
+         text("ALT: " + alt, 30, 110);
+         
+         text("BATT: " + batt, 30, 250);
+         text("TIN:  " + tin, 30, 270);
+         text("TOUT: " + tout, 30, 290);
+         text("BAR:  " + baro, 30, 310);
+         
+         text("HDG:  " + hdg, 300, 70);
+         text("SPD:  " + fields[FIELD_SPD], 300, 90);
+         
+         // append data to log file
+         log = new FileWriter(datafile, true);
+         log.write(fields[FIELD_DAT] + ";" + fields[FIELD_TIM] + ";" + lat + ";" + lon + ";" +
+             alt + ";" + batt + ";" + tin + ";" + tout + ";" + baro + ";" + hdg + ";" +
+             fields[FIELD_SPD] + "\n");
+         log.close();
+       }
+       catch (Exception e) {
+         // pass
+       }
      }
    }
   }
