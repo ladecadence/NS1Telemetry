@@ -38,11 +38,11 @@ FileWriter log;
 
 void setup() {
   // init screen and resources
-  size(600,450);
+  size(920,100);
   background(0);
   smooth(2);
   main_font = loadFont("Ubuntu-Medium-20.vlw");
-  textFont(main_font, 20);
+  textFont(main_font, 10);
   logo = loadImage("ashab-ns1.jpg");
   draw_interface();
   
@@ -84,19 +84,19 @@ void draw() {
          // draw data
          background(0);
          draw_interface();
-         textSize(15);
+         textSize(12);
          text("Data Valid: " + fields[FIELD_DAT] + " " + fields[FIELD_TIM], 30, 415);
-         text("LAT: " + lat, 30, 70);
-         text("LON: " + lon, 30, 90);
-         text("ALT: " + alt, 30, 110);
+         text("LAT: " + lat, 30, 40);
+         text("LON: " + lon, 30, 55);
+         text("ALT: " + alt + " m", 30, 70);
          
-         text("BATT: " + batt, 30, 250);
-         text("TIN:  " + tin, 30, 270);
-         text("TOUT: " + tout, 30, 290);
-         text("BAR:  " + baro, 30, 310);
+         text("BATT: " + batt + " V", 570, 40);
+         text("TIN:  " + tin + " ºC", 570, 55);
+         text("TOUT: " + tout + " ºC", 570, 70);
+         text("BAR:  " + baro + " mbar", 700, 40);
          
-         text("HDG:  " + hdg, 300, 70);
-         text("SPD:  " + fields[FIELD_SPD], 300, 90);
+         text("HDG:  " + hdg + " º", 300, 40);
+         text("SPD:  " + fields[FIELD_SPD] + " kn", 300, 55);
          
          // append data to log file
          log = new FileWriter(datafile, true);
@@ -117,21 +117,21 @@ void draw_interface() {
 // draw interface
   stroke(255);
   fill(0);
-  rect(20, 35, 250, 150);
-  rect(20, 215, 250, 150);
-  rect(290, 35, 250, 150);
+  rect(20, 15, 250, 70);
+  rect(560, 15, 250, 70);
+  rect(290, 15, 250, 70);
   rect(20, 390, 250, 40);
   stroke(0);
   fill(0);
-  textSize(20);
-  rect(30,40,textWidth("LOC"), -20);
-  rect(30,220,textWidth("STAT"), -20);
-  rect(300,40,textWidth("DIR"), -20);
+  textSize(12);
+  rect(30,20,textWidth("LOC"), -20);
+  rect(570,20,textWidth("STAT"), -20);
+  rect(300,20,textWidth("DIR"), -20);
   stroke(0);
   fill(255);
-  text("LOC", 30, 40);
-  text("STAT", 30, 220);
-  text("DIR", 300, 40);
-  image(logo, 325, 220, 200, 200);
+  text("LOC", 30, 20);
+  text("STAT", 570, 20);
+  text("DIR", 300, 20);
+  image(logo, 825, 10, 80, 80);
 }  
 
