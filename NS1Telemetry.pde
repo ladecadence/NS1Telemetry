@@ -1,5 +1,10 @@
 import processing.net.*;
 import java.io.FileWriter;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 final String TCP_IP = "127.0.0.1";
 final int    TCP_PORT = 8000;
@@ -36,9 +41,16 @@ PImage logo;
 byte[] buffer = new byte[BUFFER_SIZE];
 FileWriter log;
 
+Date current_date;
+Date last_packet_date;
+DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+long last_packet_ago;
+long diff_in_seconds;
+long diff_in_minutes;
+
 void setup() {
   // init screen and resources
-  size(920,100);
+  size(920,120);
   background(0);
   smooth(2);
   main_font = loadFont("Ubuntu-Medium-20.vlw");
@@ -51,11 +63,25 @@ void setup() {
   // send AGW "m" packet so direwolf starts sending packets to us
   agw_sock.write(M_MESSAGE);
   
-  
+  last_packet_date = new Date();
   
 }
 
 void draw() {
+  background(0);
+  draw_interface();
+  // get current date
+  current_date = new Date();
+  last_packet_ago  = current_date.getTime() - last_packet_date.getTime();
+  diff_in_seconds = TimeUnit.MILLISECONDS.toSeconds(last_packet_ago);
+  if (diff_in_seconds > 59) {
+    diff_in_minutes = TimeUnit.MILLISECONDS.toMinutes(last_packet_ago);
+    text("Último paquete recibido hace: " + diff_in_minutes + "m " + diff_in_seconds % 60 + "s", 20, 105);
+  } else {
+    text("Último paquete recibido hace: " + diff_in_seconds + "s", 20, 105);  
+  }
+  //println("Ultimo paquete recibido hace: " + diffInSeconds + "s");
+  
   // get packet data
   if (agw_sock.available() > 0) {
    int byte_num = agw_sock.readBytes(buffer);
@@ -82,8 +108,6 @@ void draw() {
          
          
          // draw data
-         background(0);
-         draw_interface();
          textSize(12);
          text("Data Valid: " + fields[FIELD_DAT] + " " + fields[FIELD_TIM], 30, 415);
          text("LAT: " + lat, 30, 40);
@@ -104,6 +128,9 @@ void draw() {
              alt + ";" + batt + ";" + tin + ";" + tout + ";" + baro + ";" + hdg + ";" +
              fields[FIELD_SPD] + "\n");
          log.close();
+         
+         // save time of this last packet
+         last_packet_date = new Date();
        }
        catch (Exception e) {
          // pass
