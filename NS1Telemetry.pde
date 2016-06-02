@@ -20,6 +20,8 @@
 
 import processing.net.*;
 import java.io.FileWriter;
+// You'll need the library HTTP-Requests-for-Processing
+// https://github.com/runemadsen/HTTP-Requests-for-Processing
 import http.requests.*;
 import java.util.Date;
 import java.text.DateFormat;
