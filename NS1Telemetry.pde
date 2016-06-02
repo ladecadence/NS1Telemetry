@@ -21,7 +21,11 @@
 import processing.net.*;
 import java.io.FileWriter;
 import http.requests.*;
-
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 // Upload
 // The upload uses HTTP authentication, you must have a "password.txt" file 
@@ -74,6 +78,13 @@ byte[] buffer = new byte[BUFFER_SIZE];
 FileWriter log;
 String log_entry;
 
+Date current_date;
+Date last_packet_date;
+DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+long last_packet_ago;
+long diff_in_seconds;
+long diff_in_minutes;
+
 void setup() {
   // HTTP password
   if (UPLOAD_TELEMETRY) {
@@ -91,7 +102,7 @@ void setup() {
 
 
   // init screen and resources
-  size(920, 100);
+  size(920, 120);
   background(0);
   smooth(2);
   main_font = loadFont("Ubuntu-Medium-20.vlw");
@@ -103,9 +114,26 @@ void setup() {
   agw_sock = new Client(this, TCP_IP, TCP_PORT);
   // send AGW "m" packet so direwolf starts sending packets to us
   agw_sock.write(M_MESSAGE);
+  
+  last_packet_date = new Date();
+  
 }
 
 void draw() {
+  background(0);
+  draw_interface();
+  // get current date
+  current_date = new Date();
+  last_packet_ago  = current_date.getTime() - last_packet_date.getTime();
+  diff_in_seconds = TimeUnit.MILLISECONDS.toSeconds(last_packet_ago);
+  if (diff_in_seconds > 59) {
+    diff_in_minutes = TimeUnit.MILLISECONDS.toMinutes(last_packet_ago);
+    text("Último paquete recibido hace: " + diff_in_minutes + "m " + diff_in_seconds % 60 + "s", 20, 105);
+  } else {
+    text("Último paquete recibido hace: " + diff_in_seconds + "s", 20, 105);  
+  }
+  //println("Ultimo paquete recibido hace: " + diffInSeconds + "s");
+  
   // get packet data
   if (agw_sock.available() > 0) {
     int byte_num = agw_sock.readBytes(buffer);
