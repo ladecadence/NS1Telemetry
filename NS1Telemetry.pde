@@ -182,7 +182,7 @@ void draw() {
           log = new FileWriter(datafile, true);
           log_entry = fields[FIELD_DAT] + ";" + fields[FIELD_TIM] + ";" + lat + ";" + lon + ";" +
             alt + ";" + batt + ";" + tin + ";" + tout + ";" + baro + ";" + hdg + ";" +
-            fields[FIELD_SPD] + "\n"
+            fields[FIELD_SPD] + "\n";
           log.write(log_entry);
           log.close();
 
