@@ -84,8 +84,6 @@ Date current_date;
 Date last_packet_date;
 DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 long last_packet_ago;
-long diff_in_seconds;
-long diff_in_minutes;
 
 void setup() {
   // HTTP password
@@ -122,19 +120,11 @@ void setup() {
 }
 
 void draw() {
-  background(0);
-  draw_interface();
-  // get current date
+  // get current date and print last packet time
   current_date = new Date();
-  last_packet_ago  = current_date.getTime() - last_packet_date.getTime();
-  diff_in_seconds = TimeUnit.MILLISECONDS.toSeconds(last_packet_ago);
-  if (diff_in_seconds > 59) {
-    diff_in_minutes = TimeUnit.MILLISECONDS.toMinutes(last_packet_ago);
-    text("Último paquete recibido hace: " + diff_in_minutes + "m " + diff_in_seconds % 60 + "s", 20, 105);
-  } else {
-    text("Último paquete recibido hace: " + diff_in_seconds + "s", 20, 105);  
-  }
-  //println("Ultimo paquete recibido hace: " + diffInSeconds + "s");
+  last_packet_ago  = current_date.getTime() - last_packet_date.getTime(); 
+  print_packet_time(last_packet_ago);
+
   
   // get packet data
   if (agw_sock.available() > 0) {
@@ -160,7 +150,9 @@ void draw() {
           String tout = split(fields[FIELD_TOU], "=")[1];
           String baro = split(fields[FIELD_BAR], "=")[1];
 
-
+          // ok, valid packet
+          last_packet_date = new Date();
+          
           // draw data
           background(0);
           draw_interface();
@@ -191,8 +183,8 @@ void draw() {
             PostRequest post = new PostRequest(server_url);
 
             post.addUser(user, password);
-            post.addData("telemetry", "26-04-2016;21:15:41;43.555367N;005.667480W;20000.5;5.56;20.81;18.62;1014.0;0;0.059");
-            //post.addData("telemetry", log_entry);
+            //post.addData("telemetry", "26-04-2016;21:15:41;43.555367N;005.667480W;20000.5;5.56;20.81;18.62;1014.0;0;0.059");
+            post.addData("telemetry", log_entry);
             post.send();
             println("Reponse Content: " + post.getContent());
             println("Reponse Content-Length Header: " + post.getHeader("Content-Length"));
@@ -228,3 +220,22 @@ void draw_interface() {
   image(logo, 825, 10, 80, 80);
 }  
 
+void print_packet_time(long d) {
+  long diff_in_seconds;
+  long diff_in_minutes;
+  
+  stroke(0);
+  fill(0);
+  textSize(12);
+  rect(20, 110, textWidth("Último paquete recibido hace:               "), -20);
+  stroke(0);
+  fill(255);
+  
+  diff_in_seconds = TimeUnit.MILLISECONDS.toSeconds(d);
+  if (diff_in_seconds > 59) {
+    diff_in_minutes = TimeUnit.MILLISECONDS.toMinutes(d);
+    text("Último paquete recibido hace: " + diff_in_minutes + "m " + diff_in_seconds % 60 + "s", 20, 105);
+  } else {
+    text("Último paquete recibido hace: " + diff_in_seconds + "s", 20, 105);  
+  }
+}
